@@ -24,8 +24,9 @@ export class HttpClient {
     this.logger = new Logger("HttpClient");
     this.defaultHeaders = {
       "User-Agent":
-        "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/131.0.0.0 Safari/537.36",
+        "Mozilla/5.0 (iPhone; CPU iPhone OS 17_0 like Mac OS X) AppleWebKit/605.1.15 (KHTML, like Gecko) Version/17.0 Mobile/15E148 Safari/604.1",
       Accept: "application/json",
+      "Accept-Language": "zh-CN,zh;q=0.9",
       ...options.defaultHeaders,
     };
   }
