@@ -39,7 +39,7 @@ Worker 名称为 `mcp-servers`，同一个入口按主题暴露 MCP 服务。
 
 | 主题 | MCP URL |
 |---|---|
-| finance | `https://<worker-domain>/finance/mcp` |
+| finance | `https://mcp.yid11.net/finance` |
 
 本地调试：
 
@@ -56,7 +56,7 @@ pnpm deploy:worker
 Codex 配置：
 
 ```bash
-codex mcp add finance --url https://<worker-domain>/finance/mcp
+codex mcp add finance --url https://mcp.yid11.net/finance
 ```
 
 ## 脚本

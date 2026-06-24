@@ -45,14 +45,14 @@ node src/servers/finance/dist/index.js
 部署 Cloudflare Worker 后，finance 主题使用同一 Worker 入口下的路径：
 
 ```bash
-codex mcp add finance --url https://<worker-domain>/finance/mcp
+codex mcp add finance --url https://mcp.yid11.net/finance
 ```
 
 等价的 `~/.codex/config.toml`：
 
 ```toml
 [mcp_servers.finance]
-url = "https://<worker-domain>/finance/mcp"
+url = "https://mcp.yid11.net/finance"
 enabled = true
 tool_timeout_sec = 60
 ```

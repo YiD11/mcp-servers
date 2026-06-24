@@ -1,32 +1,33 @@
 import { createMcpHandler } from "agents/mcp";
 import { createFinanceServer } from "@mcp-servers/finance/server";
 
-const services: Record<string, { path: string; handle: HandlerFactory }> = {
+const services: Record<string, ServiceDefinition> = {
   finance: {
-    path: "/finance/mcp",
-    handle: () => createMcpHandler(createFinanceServer(), { route: "/finance/mcp" }),
+    createServer: createFinanceServer,
   },
 };
 
 export default {
   fetch(request: Request, env: Env, ctx: ExecutionContext): Response | Promise<Response> {
     const url = new URL(request.url);
+    const topic = url.pathname.slice(1).split("/")[0];
+    const service = services[topic];
 
-    for (const service of Object.values(services)) {
-      if (url.pathname === service.path) {
-        return service.handle()(request, env, ctx);
-      }
+    if (service && url.pathname === `/${topic}`) {
+      return createMcpHandler(service.createServer(), { route: `/${topic}` })(request, env, ctx);
     }
 
     return Response.json({
       name: "mcp-servers",
       services: Object.fromEntries(
-        Object.entries(services).map(([name, service]) => [name, service.path]),
+        Object.keys(services).map((name) => [name, `/${name}`]),
       ),
     });
   },
 } satisfies ExportedHandler<Env>;
 
-type HandlerFactory = () => (request: Request, env: Env, ctx: ExecutionContext) => Promise<Response>;
+interface ServiceDefinition {
+  createServer: () => Parameters<typeof createMcpHandler>[0];
+}
 
 interface Env {}
