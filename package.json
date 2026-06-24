@@ -1,0 +1,27 @@
+{
+  "name": "mcp-servers",
+  "version": "1.0.0",
+  "private": true,
+  "type": "module",
+  "description": "A monorepo hosting multiple independent MCP servers",
+  "scripts": {
+    "build": "pnpm -r run build",
+    "build:shared": "pnpm --filter @mcp-servers/shared run build",
+    "build:finance": "pnpm --filter @mcp-servers/finance run build",
+    "build:worker": "pnpm --filter @mcp-servers/cloudflare-worker run build",
+    "dev:finance": "pnpm --filter @mcp-servers/finance run dev",
+    "dev:worker": "pnpm --filter @mcp-servers/cloudflare-worker run dev",
+    "deploy:worker": "pnpm --filter @mcp-servers/cloudflare-worker run deploy",
+    "clean": "pnpm -r run clean",
+    "typecheck": "tsc -b src/shared src/servers/finance src/workers/cloudflare"
+  },
+  "keywords": ["mcp", "model-context-protocol"],
+  "author": "",
+  "license": "ISC",
+  "packageManager": "pnpm@10.19.0",
+  "devDependencies": {
+    "typescript": "^5.8.0",
+    "@types/node": "^22.0.0",
+    "tsx": "^4.0.0"
+  }
+}

@@ -1,0 +1,20 @@
+{
+  "name": "@mcp-servers/cloudflare-worker",
+  "version": "0.1.0",
+  "private": true,
+  "type": "module",
+  "scripts": {
+    "build": "tsc -b",
+    "clean": "rm -rf dist *.tsbuildinfo .wrangler",
+    "deploy": "wrangler deploy",
+    "dev": "wrangler dev"
+  },
+  "dependencies": {
+    "@mcp-servers/finance": "workspace:*",
+    "agents": "^0.16.2"
+  },
+  "devDependencies": {
+    "@cloudflare/workers-types": "^4.20260624.1",
+    "wrangler": "^4.104.0"
+  }
+}
