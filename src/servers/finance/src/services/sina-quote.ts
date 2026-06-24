@@ -24,30 +24,37 @@ export async function fetchSinaQuote(code: string): Promise<StockQuote> {
   const match = raw.match(/="(.+?)"/);
   if (!match?.[1]) throw new Error("新浪返回数据格式异常");
 
-  const fields = match[1].split(",");
+  const f = match[1].split(",");
 
   const num = (i: number): number | null => {
-    const v = parseFloat(fields[i]);
+    const v = parseFloat(f[i]);
     return Number.isFinite(v) ? v : null;
   };
 
+  const price = num(3);
+  const prevClose = num(2);
+  const change = price !== null && prevClose !== null ? price - prevClose : null;
+  const changePct = change !== null && prevClose !== null && prevClose !== 0
+    ? +(change / prevClose * 100).toFixed(2)
+    : null;
+
   return {
     code,
-    name: fields[0] ?? "",
-    price: num(3),
-    change: num(31) !== null ? num(31)! : num(3) !== null && num(2) !== null ? num(3)! - num(2)! : null,
-    changePct: num(32),
+    name: f[0] ?? "",
+    price,
+    change,
+    changePct,
     open: num(1),
     high: num(4),
     low: num(5),
-    prevClose: num(2),
+    prevClose,
     volume: num(8),
     amount: num(9),
-    pe: num(39) ?? num(44),
-    pb: num(46),
-    marketCap: num(45),
+    pe: null,
+    pb: null,
+    marketCap: null,
     floatCap: null,
-    turnover: num(38),
-    amplitude: num(43),
+    turnover: null,
+    amplitude: null,
   };
 }

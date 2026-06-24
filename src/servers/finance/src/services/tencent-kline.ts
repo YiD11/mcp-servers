@@ -59,7 +59,7 @@ export async function fetchTencentKline(
     close: Number(r[2]) || 0,
     high: Number(r[3]) || 0,
     low: Number(r[4]) || 0,
-    volume: Number(r[5]) || 0,
+    volume: (Number(r[5]) || 0) * 100, // 手 → 股
     amount: 0,
     amplitude: 0,
     changePct: 0,
