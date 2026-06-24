@@ -1,8 +1,8 @@
 # Finance MCP Server
 
-基于东方财富公开 API 的金融数据 MCP 服务，为 AI Agent 提供中国股票市场实时行情、K线数据、市场概览等能力。
+基于多数据源的金融数据 MCP 服务，为 AI Agent 提供中国股票市场实时行情、K线数据等能力。
 
-> **⚠️ 免责声明**: 本服务使用东方财富网页端公开接口，仅供个人学习研究使用，不构成任何投资建议。数据接口为非官方接口，可能随时变更。禁止商用。
+> **⚠️ 免责声明**: 本服务使用东方财富/新浪/腾讯网页端公开接口，仅供个人学习研究使用，不构成任何投资建议。数据接口为非官方接口，可能随时变更。禁止商用。
 
 ## 功能概述
 
@@ -11,7 +11,6 @@
 | `search_stock` | 根据关键词搜索股票（支持代码、名称、拼音首字母） |
 | `get_stock_quote` | 获取单只股票的实时行情（价格、涨跌幅、成交量、市值等） |
 | `get_kline_data` | 获取K线数据（日K/周K/月K/分钟K，支持前复权/后复权） |
-| `get_market_overview` | 获取市场行情列表（沪市/深市/创业板/科创板，可排序） |
 
 ## 安装与构建
 
@@ -119,23 +118,11 @@ tool_timeout_sec = 60
 | `adjust` | enum | ❌ | `qfq` | 复权类型：`none`(不复权)/`qfq`(前复权)/`hfq`(后复权) |
 | `limit` | number | ❌ | `30` | 返回数据条数，1-500 |
 
-### get_market_overview
-
-获取市场行情列表，支持按不同字段排序。
-
-**参数**:
-| 参数 | 类型 | 必填 | 默认值 | 说明 |
-|---|---|---|---|---|
-| `market` | enum | ❌ | `sha` | 市场：`sha`(沪市)/`sza`(深市)/`cyb`(创业板)/`kcb`(科创板) |
-| `sort_field` | enum | ❌ | `change_pct` | 排序字段：`price`/`change_pct`/`volume`/`amount`/`turnover`/`market_cap` |
-| `sort_order` | enum | ❌ | `desc` | 排序方向：`asc`(升序)/`desc`(降序) |
-| `limit` | number | ❌ | `20` | 返回条数，1-100 |
-
 ## 数据源
 
-- **实时行情**: `push2.eastmoney.com`
-- **历史K线**: `push2his.eastmoney.com`
-- **股票搜索**: `searchapi.eastmoney.com`
+- **股票搜索**: `searchapi.eastmoney.com`（东方财富）
+- **实时行情**: `push2.eastmoney.com`（东方财富，失败时 fallback 到 `hq.sinajs.cn` 新浪）
+- **历史K线**: `push2his.eastmoney.com`（东方财富，失败时 fallback 到 `web.ifzq.gtimg.cn` 腾讯）
 
 支持市场：
 - 沪市A股（含科创板）

@@ -1,14 +1,9 @@
 import { HttpClient, McpToolError } from "@mcp-servers/shared";
-import { API_BASE, SEARCH_TOKEN, KLINE_PERIOD, ADJUST_TYPE, MARKET_FILTER, SORT_FIELD, MARKET_CODE } from "../config.js";
-import type { StockSearchResult, StockQuote, KlineDataPoint, MarketListItem } from "./types.js";
+import { API_BASE, SEARCH_TOKEN, KLINE_PERIOD, ADJUST_TYPE } from "../config.js";
+import type { StockSearchResult, StockQuote, KlineDataPoint } from "./types.js";
 import { buildSecId } from "./market-utils.js";
-
-const MARKET_NAME_MAP: Record<number, string> = {
-  [MARKET_CODE.SH]: "SH",
-  [MARKET_CODE.SZ]: "SZ",
-  [MARKET_CODE.HK]: "HK",
-  [MARKET_CODE.US]: "US",
-};
+import { fetchSinaQuote } from "./sina-quote.js";
+import { fetchTencentKline } from "./tencent-kline.js";
 
 export class EastMoneyClient {
   private readonly http: HttpClient;
@@ -40,7 +35,7 @@ export class EastMoneyClient {
       return items.slice(0, 10).map((item: any) => ({
         code: item.Code,
         name: item.Name,
-        market: MARKET_NAME_MAP[item.MktNum] ?? String(item.MktNum),
+        market: { 1: "SH", 0: "SZ", 116: "HK", 105: "US" }[item.MktNum as number] ?? String(item.MktNum),
         type: item.SecurityTypeName ?? "stock",
         secid: `${item.MktNum}.${item.Code}`,
       }));
@@ -54,8 +49,8 @@ export class EastMoneyClient {
   }
 
   async getRealtimeQuote(code: string): Promise<StockQuote> {
+    const secid = buildSecId(code);
     try {
-      const secid = buildSecId(code);
       const response = await this.http.getJson<any>(
         `${API_BASE.QUOTE}/api/qt/stock/get`,
         {
@@ -88,13 +83,8 @@ export class EastMoneyClient {
         turnover: div100(safeNum(d.f168)),
         amplitude: div100(safeNum(d.f171)),
       };
-    } catch (error) {
-      if (error instanceof McpToolError) throw error;
-      throw new McpToolError(
-        `获取实时行情失败 (${code}): ${error instanceof Error ? error.message : String(error)}`,
-        "QUOTE_ERROR",
-        error,
-      );
+    } catch {
+      return fetchSinaQuote(code);
     }
   }
 
@@ -123,65 +113,8 @@ export class EastMoneyClient {
 
       const klines: string[] = response?.data?.klines ?? [];
       return klines.slice(-limit).map(parseKlineLine);
-    } catch (error) {
-      if (error instanceof McpToolError) throw error;
-      throw new McpToolError(
-        `获取K线数据失败 (${code}): ${error instanceof Error ? error.message : String(error)}`,
-        "KLINE_ERROR",
-        error,
-      );
-    }
-  }
-
-  async getMarketList(
-    market: string,
-    sortField: string,
-    sortOrder: string,
-    limit: number,
-  ): Promise<MarketListItem[]> {
-    try {
-      const response = await this.http.getJson<any>(
-        `${API_BASE.QUOTE}/api/qt/clist/get`,
-        {
-          params: {
-            fs: MARKET_FILTER[market] ?? MARKET_FILTER.sha,
-            fields: "f2,f3,f4,f5,f6,f7,f8,f9,f12,f14,f15,f16,f17,f18,f20,f21",
-            pn: 1,
-            pz: limit,
-            po: sortOrder === "asc" ? 1 : 0,
-            fid: SORT_FIELD[sortField] ?? SORT_FIELD.change_pct,
-            np: 1,
-            fltt: 2,
-          },
-        },
-      );
-
-      const items: any[] = response?.data?.diff ?? [];
-      return items.map((item: any) => ({
-        code: String(item.f12 ?? ""),
-        name: String(item.f14 ?? ""),
-        price: safeNum(item.f2),
-        changePct: safeNum(item.f3),
-        changeAmt: safeNum(item.f4),
-        volume: safeNum(item.f5),
-        amount: safeNum(item.f6),
-        amplitude: safeNum(item.f7),
-        turnover: safeNum(item.f8),
-        pe: safeNum(item.f9),
-        high: safeNum(item.f15),
-        low: safeNum(item.f16),
-        open: safeNum(item.f17),
-        prevClose: safeNum(item.f18),
-        marketCap: safeNum(item.f20),
-        floatCap: safeNum(item.f21),
-      }));
-    } catch (error) {
-      if (error instanceof McpToolError) throw error;
-      throw new McpToolError(
-        `获取市场行情失败 (${market}): ${error instanceof Error ? error.message : String(error)}`,
-        "MARKET_ERROR",
-        error,
-      );
+    } catch {
+      return fetchTencentKline(code, period, adjust, limit);
     }
   }
 }
